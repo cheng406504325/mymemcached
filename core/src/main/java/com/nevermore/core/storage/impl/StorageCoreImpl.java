@@ -9,9 +9,10 @@ import com.nevermore.lifecycle.LifecycleState;
 import com.nevermore.module.CachedData;
 
 /**
- *
+ *TODO:利用双链表加ConcurrentHashMap实现LRU算法
  *
  * @author suncheng
+ * @version 0.0.1
  * @since 15/11/25
  */
 public class StorageCoreImpl implements StorageCore, Configurable {
