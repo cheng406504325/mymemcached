@@ -21,7 +21,7 @@ public class StorageCoreImpl implements StorageCore, Configurable {
 
     @Override
     public void configure(Context context) {
-
+        //TODO:
     }
 
     @Override
