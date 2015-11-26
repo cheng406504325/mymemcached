@@ -29,5 +29,5 @@ public interface Context extends AutoCloseable {
     /**
      * 初始化上下文
      */
-    void initialize();
+    void initialize() throws Exception;
 }
