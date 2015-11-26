@@ -13,4 +13,12 @@
         <groupId>com.nevermore.mymemcached</groupId>
         <version>1.0-SNAPSHOT</version>
     </parent>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.nevermore.mymemcached</groupId>
+            <artifactId>core</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
 </project>

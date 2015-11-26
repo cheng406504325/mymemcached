@@ -8,8 +8,17 @@ import com.nevermore.core.storage.impl.StorageCoreImpl;
  * @since 15/11/26
  */
 public class CachedData {
+    private byte[] bytes;
+
     private StorageCoreImpl.LRUReleaseNode node;
 
+    public byte[] getBytes() {
+        return bytes;
+    }
+
+    public void setBytes(byte[] bytes) {
+        this.bytes = bytes;
+    }
 
     public StorageCoreImpl.LRUReleaseNode getNode() {
         return node;
