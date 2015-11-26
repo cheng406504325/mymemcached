@@ -12,6 +12,6 @@ public class Bootstrap {
     private static final Logger logger = LoggerFactory.getLogger(Bootstrap.class);
 
     public static void main(String args[]) {
-        logger.info("aaaa");
+
     }
 }

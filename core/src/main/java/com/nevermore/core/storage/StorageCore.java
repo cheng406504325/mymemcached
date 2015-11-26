@@ -16,4 +16,5 @@ public interface StorageCore extends LifecycleAware {
     void delete(String key);
 
     void release();
+
 }
