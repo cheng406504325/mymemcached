@@ -1,6 +1,8 @@
 package com.nevermore.exceptions;
 
 /**
+ * 存储时发生的异常
+ *
  * @author suncheng
  * @version 0.0.1
  * @since 15/11/26

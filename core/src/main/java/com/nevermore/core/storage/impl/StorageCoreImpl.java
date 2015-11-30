@@ -2,6 +2,7 @@ package com.nevermore.core.storage.impl;
 
 import com.nevermore.context.Context;
 import com.nevermore.core.storage.StorageCore;
+import com.nevermore.exceptions.NotFoundException;
 import com.nevermore.exceptions.StorageException;
 import com.nevermore.lifecycle.Configurable;
 import com.nevermore.lifecycle.LifecycleState;
@@ -31,17 +32,25 @@ public class StorageCoreImpl implements StorageCore, Configurable {
     private static final Logger logger = LoggerFactory.getLogger(StorageCore.class);
     private ExecutorService pool = Executors.newFixedThreadPool(2);
 
+    /** 生命周期状态 */
     private volatile LifecycleState lifecycleState = STOP;
 
+    /** 执行节点移动的队列 */
     private LinkedBlockingQueue<LRUReleaseNode> commandQueue;
 
+    /** 保存数据的hashmap */
     private ConcurrentHashMap<String, CachedData> nodes;
 
+    /** 当前缓存大小 */
     private AtomicInteger currentSize;
-    private int batchReleaseSize = 3;
+
+    /** 设定的最大值 */
     private int maxSize = 10000;
 
+    /** 链表头结点 */
     private LRUReleaseNode head;
+
+    /** 链表尾节点 */
     private LRUReleaseNode last;
 
     public StorageCoreImpl() {
@@ -61,6 +70,11 @@ public class StorageCoreImpl implements StorageCore, Configurable {
         //TODO:配置缓存
     }
 
+    /**
+     * 获取
+     * @param key 键
+     * @return 值
+     */
     @Override
     public CachedData get(String key) {
         CachedData data = nodes.get(key);
@@ -68,6 +82,11 @@ public class StorageCoreImpl implements StorageCore, Configurable {
         return data;
     }
 
+    /**
+     * 保存
+     * @param key 键
+     * @param cachedData 值
+     */
     @Override
     public void set(String key, CachedData cachedData) {
         checkArgument(key != null && key.trim().length() != 0,
@@ -84,13 +103,23 @@ public class StorageCoreImpl implements StorageCore, Configurable {
         }
     }
 
+    /**
+     * 删除,仅作标记删除
+     * @param key 需要删除的key
+     */
     @Override
     public void delete(String key) {
         checkArgument(key != null, "Argument key was %s but expected not null", key);
-        checkArgument(nodes.get(key) == null, "there is no value for key %s", key);
-        nodes.remove(key);
+        CachedData data = nodes.get(key);
+        if (data == null) {
+            throw new NotFoundException();
+        }
+        data.setDeleted(true);
     }
 
+    /**
+     * 释放空间
+     */
     @Override
     public void release() {
         while (true) {
@@ -106,6 +135,9 @@ public class StorageCoreImpl implements StorageCore, Configurable {
         }
     }
 
+    /**
+     * 开启
+     */
     @Override
     public void start() {
         lifecycleState = START;
@@ -117,6 +149,9 @@ public class StorageCoreImpl implements StorageCore, Configurable {
         pool.execute(this::release);
     }
 
+    /**
+     * 停止
+     */
     @Override
     public void stop() {
         lifecycleState = STOP;
@@ -124,11 +159,21 @@ public class StorageCoreImpl implements StorageCore, Configurable {
         nodes = null;
     }
 
+    /**
+     * 获取当前生命周期状态
+     *
+     * @return 状态
+     */
     @Override
     public LifecycleState getLifecycleState() {
         return lifecycleState;
     }
 
+    /**
+     * 执行节点移动
+     *
+     * @param node 需要移动的节点
+     */
     private void doMoveToHead(LRUReleaseNode node) {
         node.next = head.next;
         node.prev = head;
@@ -136,6 +181,11 @@ public class StorageCoreImpl implements StorageCore, Configurable {
         head.next.prev = node;
     }
 
+    /**
+     * 将需要移动的节点放入执行队列中
+     *
+     * @param node 需要移动的节点
+     */
     private void moveToHead(LRUReleaseNode node) {
         try {
             commandQueue.put(node);
@@ -146,7 +196,9 @@ public class StorageCoreImpl implements StorageCore, Configurable {
         }
     }
 
-
+    /**
+     * 是内部保持使用的多的节点在前方
+     */
     private void keepNodeSorted() {
         try {
             LRUReleaseNode node = commandQueue.take();
@@ -157,6 +209,9 @@ public class StorageCoreImpl implements StorageCore, Configurable {
         }
     }
 
+    /**
+     * 实现LRU回收的链表
+     */
     public class LRUReleaseNode {
         LRUReleaseNode prev;
         LRUReleaseNode next;
