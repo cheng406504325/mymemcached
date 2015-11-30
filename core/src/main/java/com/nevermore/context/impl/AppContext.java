@@ -2,16 +2,12 @@ package com.nevermore.context.impl;
 
 import com.google.common.base.Optional;
 import com.nevermore.context.Context;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
-import static com.nevermore.utils.CloseUtil.closeQuietly;
-import static com.nevermore.utils.IOUtils.getReader;
-import static com.nevermore.utils.IOUtils.readToMap;
 
 /**
  * 应用程序上下文
@@ -20,14 +16,24 @@ import static com.nevermore.utils.IOUtils.readToMap;
  * @since 15/11/25
  */
 public class AppContext implements Context {
-    private static final String PROPERTIES_FILE_PATH = "";
+    private static final Logger logger = LoggerFactory.getLogger(Context.class);
+    private static AppContext context;
 
     private Map<String, Optional<Object>> map;
 
-    private BufferedReader reader;
+    public static AppContext getAppContext() {
+        if (context == null) {
+            synchronized (AppContext.class) {
+                if (context == null) {
+                    context = new AppContext();
+                }
+            }
+        }
+        return context;
+    }
 
-    public AppContext() throws FileNotFoundException {
-        reader = getReader(PROPERTIES_FILE_PATH);
+
+    private AppContext() {
         map = new ConcurrentHashMap<>();
     }
 
@@ -43,11 +49,9 @@ public class AppContext implements Context {
 
     @Override
     public void initialize() throws IOException {
-        readToMap(reader, map);
     }
 
     @Override
     public void close() throws Exception {
-        closeQuietly(reader);
     }
 }

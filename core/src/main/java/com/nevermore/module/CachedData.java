@@ -9,8 +9,36 @@ import com.nevermore.core.storage.impl.StorageCoreImpl;
  */
 public class CachedData {
     private byte[] bytes;
-
     private StorageCoreImpl.LRUReleaseNode node;
+    private int bodyLength;
+    private boolean deleted;
+
+    public int getFlag() {
+        return flag;
+    }
+
+    public void setFlag(int flag) {
+        this.flag = flag;
+    }
+
+    public int getBodyLength() {
+        return bodyLength;
+    }
+
+    public void setBodyLength(int bodyLength) {
+        this.bodyLength = bodyLength;
+    }
+
+    private int flag;
+
+    public CachedData() {
+
+    }
+    public CachedData(byte[] bytes, int flag, int bodyLength) {
+        this.bytes = bytes;
+        this.flag = flag;
+        this.bodyLength = bodyLength;
+    }
 
     public byte[] getBytes() {
         return bytes;
@@ -26,5 +54,13 @@ public class CachedData {
 
     public void setNode(StorageCoreImpl.LRUReleaseNode node) {
         this.node = node;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
     }
 }
